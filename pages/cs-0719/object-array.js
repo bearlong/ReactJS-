@@ -94,11 +94,19 @@ export default function ObjectArray() {
           // 1. 使用uuid或是nanoid(函式庫，需安裝)
           // const newID = self.crypto.randomUUID();
 
-          //2. 簡單隨機字串函式庫或語法
+          // 2. 簡單隨機字串函式庫或語法
           // const newID = (Math.random() + 1).toString(36).substring(7);
 
-          //3. 利用時間日期字串，或是轉換為毫秒整數
-          const newID = Date.now();
+          // 3. 利用時間日期字串，或是轉換為毫秒整數
+          // 也可以用Number(new Date()) 或 +new Date()
+          // const newID = Date.now();
+
+          // 4. 仿照資料庫資料表自動進行遞增id數字值(注意，只能id是數字類型才能使用)
+          // ids= [1, 2, 3, 4]
+
+          const ids = data.map((v) => v.id);
+          // 新id為最大值+1，如果陣列中沒有資料則從1開始計算
+          const newID = data.length > 0 ? Math.max(...ids) + 1 : 1;
 
           const newObj = { id: newID, text: 'xxx' };
           const nextData = [newObj, ...data];
@@ -110,7 +118,9 @@ export default function ObjectArray() {
       <br />
       <button
         onClick={() => {
-          const newObj = { id: data.length + 1, text: 'yyy' };
+          const ids = data.map((v) => v.id);
+          const newID = data.length ? Math.max(...ids) + 1 : 1;
+          const newObj = { id: newID, text: 'yyy' };
           const nextData = [...data, newObj];
           setData(nextData);
         }}
@@ -118,19 +128,130 @@ export default function ObjectArray() {
         4. 列表最後面，新增一個文字為yyy的物件(id不能與其它資料重覆)
       </button>
       <br />
-      <button onClick={() => {}}>
+      <button
+        onClick={() => {
+          // 1 // 2
+          // filter 跟 map 一樣，會產生新陣列，不會修改到呼叫的陣列，所以不會有副作用
+          // const nextData = data.filter((v, i) => {
+          //   return v.text.includes('a');
+          // });
+
+          // 3
+          setData(
+            data.filter((v, i) => {
+              return v.text.includes('a');
+            })
+          );
+        }}
+      >
         5. 尋找(過濾)只呈現所有文字中有包含a英文字母的資料
       </button>
       <br />
-      <button onClick={() => {}}>6. 刪除文字為b的物件資料</button>
+      <button
+        onClick={() => {
+          const nextData = data.filter((v, i) => {
+            return v.text !== 'b';
+          });
+          setData(nextData);
+        }}
+      >
+        6. 刪除文字為b的物件資料
+      </button>
       <br />
-      <button onClick={() => {}}>7. 刪除id為4的物件資料</button>
+      <button
+        onClick={() => {
+          // 1. filter(推薦)
+          // const nextData = data.filter((v, i) => {
+          //   return v.id !== 4;
+          // });
+          // setData(nextData);
+
+          // 2. for迴圈
+          // const nextData = [];
+          // for (let i = 0; i < data.length; i++) {
+          //   if (data[i].id !== 4) {
+          //     nextData.push(data[i]);
+          //   }
+          // }
+
+          // 3. splice(黏接)，注意有副作用，可能會更動到呼叫他的陣列，呼叫前要先拷貝，另外他是典型的使用索引值操作的方法
+          // 刪除公式: array.splice(deleteIndex, 1)
+          //
+          // 1. 先找到id為4的物件索引值
+          const foundIndex = data.findIndex((v) => v.id === 4);
+
+          // 2. 判斷是否有找到索引值
+          if (foundIndex !== -1) {
+            // 有找到
+            // 2-1 拷貝
+            const nextData = [...data];
+            // 2-2 在副本上處理
+            nextData.splice(foundIndex, 1);
+            // 2-3 設定回狀態
+            setData(nextData);
+          }
+        }}
+      >
+        7. 刪除id為4的物件資料
+      </button>
       <br />
-      <button onClick={() => {}}>8. 取代id為3的文字為cccc</button>
+      <button
+        onClick={() => {
+          // 1. map + 展開物件拷貝({...v})
+          // const nextData = data.map((v, i) => {
+          // 如果符合(id是3)回傳修改的屬性text是"ccccc"字串
+          // if (v.id === 3) {
+          //   return { ...v, text: 'cccc' };
+          // } else {
+          // 否則回傳原物件
+          //     return v;
+          //   }
+          // });
+          // setData(nextData);
+
+          // 2. 深拷貝
+          // 1. 先找到id為3的物件索引值
+          const foundIndex = data.findIndex((v) => v.id === 3);
+          // 2. 判斷是否有找到索引值
+          if (foundIndex !== -1) {
+            // 有找到
+            // 2-1 拷貝
+            const nextData = JSON.parse(JSON.stringify(data));
+            // 2-2 在副本上處理
+            nextData[foundIndex].text = 'cccc';
+            // 2-3 設定回狀態
+            setData(nextData);
+          }
+        }}
+      >
+        8. 取代id為3的文字為cccc
+      </button>
       <br />
-      <button onClick={() => {}}>9. 清空表格</button>
+      <button
+        onClick={() => {
+          const nextData = [];
+          setData(nextData);
+        }}
+      >
+        9. 清空表格
+      </button>
       <br />
-      <button onClick={() => {}}>
+      <button
+        onClick={() => {
+          // 1. slice(切割)
+          // 語法公式(注意不包含endindex): array.slice(startIndex, endIndex)
+          // 1. 先找到id為3的物件索引值
+          const foundIndex = data.findIndex((v) => v.id === 2);
+          // 2. 判斷是否有找到索引值
+          if (foundIndex !== -1) {
+            const aa = data.slice(0, foundIndex + 1);
+            const ab = data.slice(foundIndex + 1);
+            const nextObj = { id: 5, text: 'bbb' };
+            const nextData = [...aa, nextObj, ...ab];
+            setData(nextData);
+          }
+        }}
+      >
         10. 在id為2後面插入id為5與文字為bbb的物件
       </button>
     </>
