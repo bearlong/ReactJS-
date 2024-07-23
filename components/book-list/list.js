@@ -41,10 +41,14 @@ export default function List() {
         </thead>
         <tbody>
           {books.map((book) => {
+            const { isbn, title, author, fav } = book;
             return (
               <Item
-                key={book.isbn}
-                book={book}
+                key={isbn}
+                isbn={isbn}
+                title={title}
+                author={author}
+                fav={fav}
                 handleToggleFav={handleToggleFav}
               />
             );
