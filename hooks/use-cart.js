@@ -7,11 +7,14 @@ import { createContext, useContext, useEffect, useState } from 'react';
 // 傳入參數為defaultValue，是在套用context時錯誤或失敗才會得到的值。
 // 可以使用有意義的預設值，或使用null(通常目的是為了除錯)
 export const CartContext = createContext(null);
+
 export function CartProvider({ children }) {
+  const [didMount, setDidMount] = useState('');
+
   let initItems = [];
-  if (typeof window !== 'undefined') {
-    initItems = JSON.parse(localStorage.getItem('cart')) || [];
-  }
+  // if (typeof window !== 'undefined') {
+  //   initItems = JSON.parse(localStorage.getItem('cart')) || [];
+  // }
 
   const [cartItems, setCartItems] = useState(initItems);
 
@@ -97,10 +100,24 @@ export function CartProvider({ children }) {
   // 計算總金額與數量(使用陣列)reduce
   const totalQty = cartItems.reduce((acc, v) => (acc += v.qty), 0);
   const totalPrice = cartItems.reduce((acc, v) => (acc += v.qty * v.price), 0);
+
+  // 初次渲染的時間點
   useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cartItems));
-    console.log(`save ${cartItems.length} to localStroage`);
-  }, [cartItems]);
+    // 保護語法，避免掉ssr重複渲染的情況
+    setDidMount(true);
+    if (typeof window !== 'undefined') {
+      setCartItems(JSON.parse(localStorage.getItem('cart')) || []);
+    }
+    // localStorage.setItem('cart', JSON.stringify(cartItems));
+    // console.log(`save ${cartItems.length} to localStroage`);
+  }, []);
+
+  useEffect(() => {
+    if (didMount) {
+      localStorage.setItem('cart', JSON.stringify(cartItems));
+      console.log(`save ${cartItems.length} to localStroage`);
+    }
+  }, [cartItems, didMount]);
 
   return (
     <CartContext.Provider
