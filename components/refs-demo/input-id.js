@@ -21,7 +21,7 @@ export default function InputId() {
       </button>
       <button
         onClick={() => {
-          document.querySelector('#my-input').value;
+          alert(document.querySelector('#my-input').value);
         }}
       >
         取得值
