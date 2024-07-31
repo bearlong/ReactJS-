@@ -8,6 +8,8 @@ import { AuthProvider } from '@/hooks/use-auth';
 // 套用CartProvider
 import { CartProvider } from '@/hooks/use-cart';
 
+import NextTopLoader from 'nextjs-toploader';
+
 export default function MyApp({ Component, pageProps }) {
   // 會員的狀態
 
@@ -17,7 +19,10 @@ export default function MyApp({ Component, pageProps }) {
   // context 需要包裹住所有元件(頁面元件)，value屬性中放入要共享的值/狀態
   return (
     <AuthProvider>
-      <CartProvider>{getLayout(<Component {...pageProps} />)}</CartProvider>
+      <CartProvider>
+        <NextTopLoader color="#ffe9b1" height={10} />
+        {getLayout(<Component {...pageProps} />)}
+      </CartProvider>
     </AuthProvider>
   );
 }
